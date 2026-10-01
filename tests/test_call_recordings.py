@@ -93,6 +93,19 @@ def test_child_is_wired_and_unpartitioned() -> None:
     )
 
 
+def test_child_does_not_force_parent_full_table() -> None:
+    """Selecting call_recordings must leave calls INCREMENTAL.
+
+    Tap._set_compatible_replication_methods (run by sync_all) forces a parent to
+    FULL_TABLE when a selected child ignores the parent replication key; that
+    re-pulled every call on the first production run.
+    """
+    tap = TapServiceTitan(config=_CONFIG, parse_env_config=False)
+    assert tap.streams["call_recordings"].selected
+    tap._set_compatible_replication_methods()  # noqa: SLF001 - the exact SDK hook under test
+    assert tap.streams["calls"].replication_method == "INCREMENTAL"
+
+
 def test_404_is_not_an_error() -> None:
     """A 404 recording is a data point, not a fatal API error."""
     _, recordings = _streams()

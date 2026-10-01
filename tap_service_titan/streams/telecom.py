@@ -136,7 +136,11 @@ class CallRecordingsStream(ServiceTitanBaseStream, api_prefix="/telecom/v2"):
     primary_keys = ("id",)
     replication_key = None
     parent_stream_type = CallsStream
-    ignore_parent_replication_key = True
+    # MUST stay False: the SDK's Tap._set_compatible_replication_methods forces a
+    # parent to FULL_TABLE when a selected child ignores its replication key, which
+    # re-pulled every Bachmans call (~184k) on the first hourly run (2026-10-01).
+    # We only want recordings for calls modified since the last bookmark.
+    ignore_parent_replication_key = False
     # One parent context per call — never partition state by it.
     state_partitioning_keys: ClassVar[list[str]] = []
 
