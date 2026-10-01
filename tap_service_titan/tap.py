@@ -102,6 +102,16 @@ class TapServiceTitan(Tap):
             ),
         ),
         th.Property(
+            "call_recordings_lookback_days",
+            th.IntegerType,
+            default=30,
+            description=(
+                "The `call_recordings` stream ignores calls created more than this many "
+                "days ago, so a full refresh of `calls` cannot replay every recording "
+                "the tenant ever made. 0 disables the cap."
+            ),
+        ),
+        th.Property(
             "capacities_lookahead_days",
             th.IntegerType,
             default=14,

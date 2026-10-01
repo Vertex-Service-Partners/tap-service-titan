@@ -106,6 +106,15 @@ def test_short_calls_emit_nothing() -> None:
     assert list(recordings.get_records(ctx)) == []
 
 
+def test_old_calls_are_skipped_by_lookback(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Calls older than call_recordings_lookback_days emit nothing — full refreshes stay bounded."""
+    recordings = _recordings_with_response(
+        monkeypatch, Mock(side_effect=AssertionError("must not download"))
+    )
+    ctx = {**_ONE_MINUTE_CALL, "created_on": "2020-01-01T00:00:00.1234567Z"}
+    assert list(recordings.get_records(ctx)) == []
+
+
 def test_existing_file_is_not_redownloaded(monkeypatch: pytest.MonkeyPatch) -> None:
     """A file already on the stage is reported as downloaded without an HTTP call."""
     recordings = _recordings_with_response(

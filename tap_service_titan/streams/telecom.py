@@ -5,9 +5,10 @@ from __future__ import annotations
 import base64
 import contextlib
 import os
+import re
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -71,6 +72,17 @@ def _duration_seconds(duration: str | None) -> float | None:
         return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
     except ValueError:
         return None
+
+
+_ISO_PREFIX = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})")
+
+
+def _parse_timestamp(value: str | None) -> datetime | None:
+    """Second-precision parse of ServiceTitan's ISO timestamps (7-digit fractions, ``Z``)."""
+    match = _ISO_PREFIX.match(value or "")
+    if not match:
+        return None
+    return datetime.fromisoformat(f"{match.group(1)}T{match.group(2)}").replace(tzinfo=timezone.utc)
 
 
 def _env(*names: str) -> str | None:
@@ -254,6 +266,18 @@ class CallRecordingsStream(ServiceTitanBaseStream, api_prefix="/telecom/v2"):
         min_duration = self.config.get("call_recordings_min_duration_seconds", 20)
         if duration is not None and duration < min_duration:
             return  # too short to be worth transcribing; emit nothing
+
+        # A full refresh (or a parent bookmark reset) replays every call since
+        # start_date; without this cap that is every recording the tenant ever
+        # made — hours of PUTs and a transcription bill to match.
+        lookback_days = self.config.get("call_recordings_lookback_days", 30)
+        created_on = _parse_timestamp(context.get("created_on"))
+        if (
+            lookback_days
+            and created_on is not None
+            and created_on < datetime.now(tz=timezone.utc) - timedelta(days=lookback_days)
+        ):
+            return
 
         base: dict[str, Any] = {
             "id": call_id,
