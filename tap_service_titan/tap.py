@@ -83,6 +83,25 @@ class TapServiceTitan(Tap):
             description="The start date-time for incremental streams.",
         ),
         th.Property(
+            "call_recordings_stage",
+            th.StringType,
+            description=(
+                "Snowflake internal stage (DB.SCHEMA.STAGE) that the `call_recordings` "
+                "stream PUTs call audio into, under `{tenant_id}/{call_id}.<ext>`. The "
+                "stream connects with the loader's TARGET_SNOWFLAKE_* environment. "
+                "Required only when `call_recordings` is selected."
+            ),
+        ),
+        th.Property(
+            "call_recordings_min_duration_seconds",
+            th.IntegerType,
+            default=20,
+            description=(
+                "Calls shorter than this are skipped by the `call_recordings` stream "
+                "(no download, no record)."
+            ),
+        ),
+        th.Property(
             "capacities_lookahead_days",
             th.IntegerType,
             default=14,
@@ -302,6 +321,7 @@ class TapServiceTitan(Tap):
             streams.settings.UserRolesStream(self),
             streams.task_management.TasksStream(self),
             streams.telecom.CallsStream(self),
+            streams.telecom.CallRecordingsStream(self),
         ]
         custom_reports_config = self.config.get("custom_reports", [])
         if custom_reports_config:

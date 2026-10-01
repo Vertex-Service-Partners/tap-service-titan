@@ -26,6 +26,8 @@ dependencies = [
 
 [project.optional-dependencies]
 s3 = [ "s3fs>=2026.6,<2026.8" ]
+# `call_recordings` stream: PUTs call audio to a Snowflake internal stage.
+snowflake = [ "snowflake-connector-python>=3.12", "cryptography>=42" ]
 
 [project.scripts]
 tap-service-titan = "tap_service_titan.tap:TapServiceTitan.cli"
