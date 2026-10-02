@@ -14,6 +14,11 @@ _CONFIG = {
     "st_app_key": "x",
     "tenant_id": "3984754116",
 }
+_CAMPAIGN_ID = 11
+_ADGROUP_ID = 22
+_CLICKS = 3
+_AVERAGE_CPC = 1.5
+_FINITE_RATE = 0.25
 
 
 def _adgroup_stream() -> AdGroupPerformanceStream:
@@ -25,12 +30,13 @@ def _adgroup_stream() -> AdGroupPerformanceStream:
 
 
 def test_null_non_finite() -> None:
+    """Only IEEE non-finite values and the .NET literals become None."""
     assert _null_non_finite("Infinity") is None
     assert _null_non_finite("-Infinity") is None
     assert _null_non_finite("NaN") is None
     assert _null_non_finite(float("inf")) is None
     assert _null_non_finite(float("nan")) is None
-    assert _null_non_finite(0.25) == 0.25
+    assert _null_non_finite(_FINITE_RATE) == _FINITE_RATE
     assert _null_non_finite(0) == 0
     assert _null_non_finite(None) is None
     assert _null_non_finite("infinity pools") == "infinity pools"
@@ -40,14 +46,14 @@ def test_post_process_nulls_infinite_rates() -> None:
     """Regression: clickRate = "Infinity" (clicks, zero impressions) killed the hourly run."""
     stream = _adgroup_stream()
     row = {
-        "campaign": {"id": 11, "name": "Roof Repair"},
-        "adGroup": {"id": 22, "name": "Emergency"},
+        "campaign": {"id": _CAMPAIGN_ID, "name": "Roof Repair"},
+        "adGroup": {"id": _ADGROUP_ID, "name": "Emergency"},
         "keyword": None,
         "digitalStats": {
             "impressions": 0,
-            "clicks": 3,
+            "clicks": _CLICKS,
             "clickRate": "Infinity",
-            "averageCPC": 1.5,
+            "averageCPC": _AVERAGE_CPC,
             "conversionRate": "NaN",
             "costPerConversion": None,
         },
@@ -61,12 +67,12 @@ def test_post_process_nulls_infinite_rates() -> None:
     assert out["digitalStats"]["clickRate"] is None
     assert out["digitalStats"]["conversionRate"] is None
     assert out["digitalStats"]["costPerConversion"] is None
-    assert out["digitalStats"]["averageCPC"] == 1.5
-    assert out["digitalStats"]["clicks"] == 3
+    assert out["digitalStats"]["averageCPC"] == _AVERAGE_CPC
+    assert out["digitalStats"]["clicks"] == _CLICKS
     assert out["leadStats"]["bookingRate"] is None
     assert out["leadStats"]["avgTicket"] == 0.0
     assert out["returnOnInvestment"] is None
     # the existing flattening still happens
-    assert out["campaign_id"] == 11
-    assert out["adGroup_id"] == 22
+    assert out["campaign_id"] == _CAMPAIGN_ID
+    assert out["adGroup_id"] == _ADGROUP_ID
     assert out["keyword_id"] is None
