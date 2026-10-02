@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import sys
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
@@ -21,6 +22,23 @@ if TYPE_CHECKING:
 
 class _BaseMarketingAdsStream(ServiceTitanStream[DateRange], api_prefix="/marketingads/v2"):
     pass
+
+
+# ServiceTitan's API is .NET, which serialises ``double.PositiveInfinity`` /
+# ``NegativeInfinity`` / ``NaN`` as these string literals -- e.g. ``clickRate``
+# when an ad group has clicks but zero impressions (seen 2026-10-02, North Creek).
+# They fail the ``number | null`` record schema in the loader and kill the run.
+_NET_NON_FINITE = frozenset({"Infinity", "-Infinity", "NaN"})
+_PERFORMANCE_STATS_KEYS = ("digitalStats", "leadStats")
+
+
+def _null_non_finite(value: Any) -> Any:  # noqa: ANN401
+    """Return ``None`` for a non-finite number (float or .NET literal), else ``value``."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, str) and value in _NET_NON_FINITE:
+        return None
+    return value
 
 
 class AttributedLeadsStream(_BaseMarketingAdsStream):
@@ -126,6 +144,12 @@ class _PerformanceStream(_BaseMarketingAdsStream):
         row["date"] = self.paginator.current_value.start.date()
         row["from_utc"] = self.paginator.current_value.start
         row["to_utc"] = self.paginator.current_value.end
+        for key in _PERFORMANCE_STATS_KEYS:
+            stats = row.get(key)
+            if isinstance(stats, dict):
+                row[key] = {name: _null_non_finite(v) for name, v in stats.items()}
+        if "returnOnInvestment" in row:
+            row["returnOnInvestment"] = _null_non_finite(row["returnOnInvestment"])
         return row
 
     @override
