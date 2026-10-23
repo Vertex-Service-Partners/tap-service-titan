@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import typing as t
 
@@ -26,6 +27,18 @@ class _BaseJpmExportStream(ServiceTitanExportStream, api_prefix="/jpm/v2"):
     pass
 
 
+# Inline base64 images pasted into a job summary (``<img src="data:image/png;base64,...">``)
+# can exceed Snowflake's 16 MB VARCHAR limit and fail the whole load (Action Roofing, 2026-10-21).
+_INLINE_DATA_URI = re.compile(r"data:[\w.+-]+/[\w.+-]+;base64,[A-Za-z0-9+/=]+")
+
+
+def _strip_inline_data_uris(html: str | None) -> str | None:
+    """Replace inline base64 data URIs with a short placeholder."""
+    if not html or "base64," not in html:
+        return html
+    return _INLINE_DATA_URI.sub("data:,inline-image-removed", html)
+
+
 # JPM Streams
 class AppointmentsStream(_BaseJpmExportStream, active_any=True):
     """Define appointments stream."""
@@ -45,6 +58,13 @@ class JobsStream(_BaseJpmExportStream):
     primary_keys = ("id",)
     replication_key: str = "modifiedOn"
     schema = ServiceTitanSchema(JPM, key="Jpm.V2.ExportJobsResponse")
+
+    @override
+    def post_process(self, row: Record, context: Context | None = None) -> Record | None:
+        """Strip inline base64 images from the HTML summary."""
+        if "summary" in row:
+            row["summary"] = _strip_inline_data_uris(row["summary"])
+        return row
 
     @override
     def get_child_context(self, record: Record, context: Context | None) -> Context:
