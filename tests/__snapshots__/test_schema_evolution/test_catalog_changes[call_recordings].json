@@ -1,0 +1,182 @@
+{
+  "key_properties": [
+    "id"
+  ],
+  "metadata": [
+    {
+      "breadcrumb": [
+        "properties",
+        "id"
+      ],
+      "metadata": {
+        "inclusion": "automatic"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "recordingUrl"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "stagePath"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "status"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "httpStatus"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "contentType"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "audioBytes"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "durationSeconds"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "callCreatedOn"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "fetchedAt"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [],
+      "metadata": {
+        "inclusion": "available",
+        "selected": true,
+        "selected-by-default": true,
+        "table-key-properties": [
+          "id"
+        ]
+      }
+    }
+  ],
+  "replication_method": "FULL_TABLE",
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "audioBytes": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "callCreatedOn": {
+        "format": "date-time",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "contentType": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "durationSeconds": {
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "fetchedAt": {
+        "format": "date-time",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "httpStatus": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "id": {
+        "description": "ServiceTitan call id.",
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "recordingUrl": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "stagePath": {
+        "description": "Path of the audio file relative to the stage root, or null.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "status": {
+        "description": "downloaded | no_recording (404 / empty body) | too_large.",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "type": "object"
+  },
+  "stream": "call_recordings",
+  "tap_stream_id": "call_recordings"
+}

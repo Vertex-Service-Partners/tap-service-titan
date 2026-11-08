@@ -446,14 +446,14 @@
         ]
       },
       "allowDiscounts": {
-        "description": "Whether discounts of this kind may be applied to the service.",
+        "description": "Whether this kind of discount may be applied to the service.",
         "type": [
           "boolean",
           "null"
         ]
       },
       "allowMembershipDiscounts": {
-        "description": "Whether discounts of this kind may be applied to the service.",
+        "description": "Whether this kind of discount may be applied to the service.",
         "type": [
           "boolean",
           "null"
