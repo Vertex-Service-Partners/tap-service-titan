@@ -107,7 +107,7 @@ class ServiceTitanSchema(StreamSchema):
                     prop,
                     {
                         "type": ["boolean", "null"],
-                        "description": "Whether this kind of discount may be applied to the service.",
+                        "description": "Whether this discount type may be applied to the service.",
                     },
                 )
 
