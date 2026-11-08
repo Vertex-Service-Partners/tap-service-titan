@@ -377,6 +377,24 @@
       }
     },
     {
+      "breadcrumb": [
+        "properties",
+        "allowDiscounts"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
+      "breadcrumb": [
+        "properties",
+        "allowMembershipDiscounts"
+      ],
+      "metadata": {
+        "inclusion": "available"
+      }
+    },
+    {
       "breadcrumb": [],
       "metadata": {
         "inclusion": "available",
@@ -424,6 +442,20 @@
         "format": "decimal",
         "type": [
           "number",
+          "null"
+        ]
+      },
+      "allowDiscounts": {
+        "description": "Whether discounts of this kind may be applied to the service.",
+        "type": [
+          "boolean",
+          "null"
+        ]
+      },
+      "allowMembershipDiscounts": {
+        "description": "Whether discounts of this kind may be applied to the service.",
+        "type": [
+          "boolean",
           "null"
         ]
       },

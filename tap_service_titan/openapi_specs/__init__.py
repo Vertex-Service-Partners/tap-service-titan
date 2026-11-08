@@ -97,6 +97,20 @@ class ServiceTitanSchema(StreamSchema):
         if stream.name == "categories":
             schema["required"].remove("modifiedOn")
 
+        if stream.name in ("services", "export_services"):
+            # ServiceTitan's published Pricebook v2 OpenAPI document omits these two
+            # booleans, but the live API returns them on every record of both
+            # /pricebook/v2/tenant/{id}/services and /export/services (verified
+            # 2026-11-08). setdefault keeps the spec's definition if it ever catches up.
+            for prop in ("allowDiscounts", "allowMembershipDiscounts"):
+                schema["properties"].setdefault(
+                    prop,
+                    {
+                        "type": ["boolean", "null"],
+                        "description": "Whether this kind of discount may be applied to the service.",
+                    },
+                )
+
         if stream.name in ("campaign_performance", "keyword_performance", "adgroup_performance"):
             # TODO(maintainers): Remove these `status` patches once ServiceTitan fixes this.
             # https://github.com/archdotdev/tap-service-titan/issues/163
